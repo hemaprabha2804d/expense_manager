@@ -37,29 +37,32 @@
     <div class="card-header">
       <div class="card-title">By Category</div>
       
-      <!-- 🔴 Selector Options Wrapper -->
+      <!-- 🔴 Period Selector -->
       <div style="display:flex; gap:8px;">
-        <!-- Chart Type Select -->
-        <select id="chartType" style="width:auto; padding:6px 12px; font-size:12px; border-radius:8px; background:var(--surface2);">
-          <option value="doughnut">Doughnut</option>
-          <option value="pie">Pie</option>
-          <option value="bar">Bar</option>
-          <option value="polarArea">Polar</option>
-        </select>
-
-        <!-- Month Select dropdown -->
-        {% if months_keys %}
-        <select id="monthSelect" style="width:auto; padding:6px 12px; font-size:12px; border-radius:8px; background:var(--surface2);">
+        <select id="periodSelect" style="width:auto; padding:6px 12px; font-size:12px; border-radius:8px; background:var(--surface2);">
           <option value="all">All Time</option>
-          {% for m in months_keys %}
-          <option value="{{ m }}">{{ m }}</option>
-          {% endfor %}
+          
+          {% if months_keys %}
+          <optgroup label="Months">
+            {% for m in months_keys %}
+            <option value="m_{{ m }}">{{ m }}</option>
+            {% endfor %}
+          </optgroup>
+          {% endif %}
+
+          {% if years_keys %}
+          <optgroup label="Years">
+            {% for y in years_keys %}
+            <option value="y_{{ y }}">{{ y }}</option>
+            {% endfor %}
+          </optgroup>
+          {% endif %}
         </select>
-        {% endif %}
       </div>
     </div>
     {% if total_count > 0 %}
-      <div style="max-width:320px;margin:0 auto;position:relative;"><canvas id="catChart"></canvas></div>
+      <!-- 🔴 Padded container height for Bar spacing -->
+      <div style="max-width:420px;margin:0 auto;position:relative;height:240px;"><canvas id="catChart"></canvas></div>
     {% else %}
       <div class="empty-state"><span class="e-icon">🗂️</span>No data yet</div>
     {% endif %}
@@ -103,6 +106,7 @@ const COLORS = ['#6c63ff','#fc5c7d','#43e97b','#f7971e','#00d2ff','#a29bfe','#55
 const allLabels = {{ cat_labels|safe }};
 const allValues = {{ cat_values|safe }};
 const monthlyData = {{ cat_by_month|safe }};
+const yearlyData  = {{ cat_by_year|safe }}; // 🔴 Added
 
 let catChart = null;
 let currentLabels = allLabels;
@@ -111,67 +115,67 @@ let currentValues = allValues;
 {% if total_count > 0 %}
 const ctx = document.getElementById('catChart').getContext('2d');
 
-function renderChart(type) {
+function renderChart() {
     if(catChart) catChart.destroy();
     
-    // Bar/Polar often prefer scales, Doughnut doesn't
-    const showScales = ['bar','line'].includes(type);
-
+    // 🔴 Locked into 'bar' default config
     catChart = new Chart(ctx, {
-      type: type,
+      type: 'bar',
       data: {
         labels: currentLabels,
         datasets: [{
+          label: 'Spent (₹)',
           data: currentValues,
-          backgroundColor: COLORS,
-          borderWidth: showScales ? 1 : 0,
-          borderColor: showScales ? 'var(--border)' : 'transparent',
-          hoverOffset: 8
+          backgroundColor: COLORS.map(c => c + 'cc'), // slightly transparent for bar body
+          borderColor: COLORS,
+          borderWidth: 1,
+          borderRadius: 6
         }]
       },
       options: {
-        cutout: type === 'doughnut' ? '65%' : 0,
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { color: '#8892a4', font: { size: 11 }, padding: 12, boxWidth: 10 } },
-          tooltip: { callbacks: { label: c => ' ₹' + c.parsed.toLocaleString() } }
+          legend: { display: false }, // Bar usually doesn't need legend grouping labels
+          tooltip: { callbacks: { label: c => ' ₹' + c.parsed.y.toLocaleString() } }
         },
-        scales: showScales ? {
-          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8892a4' } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8892a4', callback: v => '₹'+v } },
           x: { grid: { display: false }, ticks: { color: '#8892a4' } }
-        } : {}
+        }
       }
     });
 }
 
 // Initial Render
-renderChart('doughnut');
+renderChart();
 
-// 🔴 Filter Month trigger
-const monthSelect = document.getElementById('monthSelect');
-const chartTypeSelect = document.getElementById('chartType');
+// 🔴 Filter Period trigger
+const periodSelect = document.getElementById('periodSelect');
 
 function updateData() {
-    const selectedMonth = monthSelect ? monthSelect.value : 'all';
+    const selected = periodSelect ? periodSelect.value : 'all';
     
-    if(selectedMonth === 'all') {
+    if(selected === 'all') {
       currentLabels = allLabels;
       currentValues = allValues;
     } else {
-      const data = monthlyData[selectedMonth] || {};
+      const isMonth = selected.startsWith('m_');
+      const key = selected.substring(2);
+      const data = isMonth ? (monthlyData[key] || {}) : (yearlyData[key] || {});
+      
       currentLabels = Object.keys(data);
       currentValues = Object.values(data);
     }
     
-    renderChart(chartTypeSelect.value);
+    renderChart();
 }
 
-if(monthSelect) monthSelect.addEventListener('change', updateData);
-if(chartTypeSelect) chartTypeSelect.addEventListener('change', () => renderChart(chartTypeSelect.value));
+if(periodSelect) periodSelect.addEventListener('change', updateData);
 
 {% endif %}
 
-// 🔴 Auto-fade Alert Banner
+// Auto-fade Alert Banner
 setTimeout(() => {
     const alertBanner = document.querySelector('.alert');
     if(alertBanner) {
@@ -180,6 +184,6 @@ setTimeout(() => {
         alertBanner.style.transform = 'translateY(-10px)';
         setTimeout(() => alertBanner.style.display = 'none', 600);
     }
-}, 4000); // Fades after 4 seconds
+}, 4000);
 </script>
 {% endblock %}

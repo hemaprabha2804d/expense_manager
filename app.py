@@ -30,9 +30,9 @@ def get_dashboard_data():
     category_totals = defaultdict(int)
     monthly_totals  = defaultdict(int)
     
-    # 🔴 Monthwise Category Totals
-    # Format: { "2026-03": { "Food": 500 }, "2026-02": { ... } }
+    # 🔴 Period aggregators
     cat_by_month = defaultdict(lambda: defaultdict(int))
+    cat_by_year  = defaultdict(lambda: defaultdict(int))
     
     total_amount    = 0
     monthly_this    = 0
@@ -48,11 +48,13 @@ def get_dashboard_data():
         if date_str:
             try:
                 d   = datetime.strptime(date_str, "%Y-%m-%d")
-                key = d.strftime("%Y-%m")
-                monthly_totals[key] += amt
+                m_key = d.strftime("%Y-%m")
+                y_key = d.strftime("%Y")
+                monthly_totals[m_key] += amt
                 
-                # 🔴 Save categorized amount by month key
-                cat_by_month[key][cat] += amt
+                # 🔴 Save categorized amounts
+                cat_by_month[m_key][cat] += amt
+                cat_by_year[y_key][cat] += amt
                 
                 if d.year == now.year and d.month == now.month:
                     monthly_this += amt
@@ -63,8 +65,9 @@ def get_dashboard_data():
     total_income = sum(i.get("amount", 0) for i in income)
     net_balance  = total_income - total_amount
 
-    # Available Months as string labels sorted (for select dropdown)
+    # Available Periods sorted
     months_keys = sorted(list(cat_by_month.keys()), reverse=True)
+    years_keys  = sorted(list(cat_by_year.keys()), reverse=True)
 
     avg_expense = round(total_amount / len(expenses)) if expenses else 0
     highest_cat = max(category_totals, key=category_totals.get) if category_totals else "—"
@@ -78,8 +81,10 @@ def get_dashboard_data():
     return {
         "cat_labels":   json.dumps(list(category_totals.keys())),
         "cat_values":   json.dumps(list(category_totals.values())),
-        "cat_by_month": json.dumps(cat_by_month), # 🔴 Added Monthly Aggregator JS ready
-        "months_keys":  months_keys,               # 🔴 Array list of months
+        "cat_by_month": json.dumps(cat_by_month),
+        "cat_by_year":  json.dumps(cat_by_year), # 🔴 Added
+        "months_keys":  months_keys,
+        "years_keys":   years_keys,               # 🔴 Added
         "total_amount": total_amount,
         "monthly_this": monthly_this,
         "avg_expense":  avg_expense,
