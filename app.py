@@ -24,11 +24,16 @@ def inject_current_path():
 # ── Helper: build all chart + stats data ─────────────────────────────────────
 def get_dashboard_data():
     expenses = list(expenses_collection.find())
-    income   = list(income_collection.find())  # 🔴 Fetch Income
+    income   = list(income_collection.find())  # Fetch Income
     now = datetime.now()
 
     category_totals = defaultdict(int)
     monthly_totals  = defaultdict(int)
+    
+    # 🔴 Monthwise Category Totals
+    # Format: { "2026-03": { "Food": 500 }, "2026-02": { ... } }
+    cat_by_month = defaultdict(lambda: defaultdict(int))
+    
     total_amount    = 0
     monthly_this    = 0
 
@@ -45,24 +50,21 @@ def get_dashboard_data():
                 d   = datetime.strptime(date_str, "%Y-%m-%d")
                 key = d.strftime("%Y-%m")
                 monthly_totals[key] += amt
+                
+                # 🔴 Save categorized amount by month key
+                cat_by_month[key][cat] += amt
+                
                 if d.year == now.year and d.month == now.month:
                     monthly_this += amt
             except Exception:
                 pass
 
-    # 🔴 Income Calculations
+    # Income Calculations
     total_income = sum(i.get("amount", 0) for i in income)
     net_balance  = total_income - total_amount
 
-    # Last 6 months labels + values
-    from calendar import month_abbr
-    month_labels, month_values = [], []
-    for i in range(5, -1, -1):
-        m   = (now.month - i - 1) % 12 + 1
-        y   = now.year if now.month - i > 0 else now.year - 1
-        key = f"{y}-{m:02d}"
-        month_labels.append(f"{month_abbr[m]} {str(y)[-2:]}")
-        month_values.append(monthly_totals.get(key, 0))
+    # Available Months as string labels sorted (for select dropdown)
+    months_keys = sorted(list(cat_by_month.keys()), reverse=True)
 
     avg_expense = round(total_amount / len(expenses)) if expenses else 0
     highest_cat = max(category_totals, key=category_totals.get) if category_totals else "—"
@@ -76,16 +78,16 @@ def get_dashboard_data():
     return {
         "cat_labels":   json.dumps(list(category_totals.keys())),
         "cat_values":   json.dumps(list(category_totals.values())),
-        "month_labels": json.dumps(month_labels),
-        "month_values": json.dumps(month_values),
+        "cat_by_month": json.dumps(cat_by_month), # 🔴 Added Monthly Aggregator JS ready
+        "months_keys":  months_keys,               # 🔴 Array list of months
         "total_amount": total_amount,
         "monthly_this": monthly_this,
         "avg_expense":  avg_expense,
         "highest_cat":  highest_cat,
         "recent":       recent,
         "total_count":  len(expenses),
-        "total_income": total_income,    # 🔴 Added Income
-        "net_balance":  net_balance       # 🔴 Added Net Balance
+        "total_income": total_income,
+        "net_balance":  net_balance
     }
 
 
