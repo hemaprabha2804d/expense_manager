@@ -1,78 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>AI Expense Tracker</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #4facfe, #00f2fe);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+{% extends 'base_auth.html' %}
+{% block title %}AI Expense Tracker{% endblock %}
+{% block subtitle %}Manage your finances smartly with AI{% endblock %}
 
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 350px;
-        }
+{% block content %}
+<div style="text-align:center;margin-bottom:28px;">
+  <h2 style="font-size:28px;margin-bottom:8px;">👋 Welcome!</h2>
+  <p style="color:var(--muted);font-size:14px;">Track, analyse, and control your spending</p>
+</div>
 
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-        }
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
+  {% for icon, label, desc in [
+    ('📊','Smart Analytics','Charts & insights'),
+    ('🤖','AI Suggestions','Smart spending tips'),
+    ('📅','Monthly Reports','Track by period'),
+    ('🏷️','Categories','Organized tracking')
+  ] %}
+  <div style="background:var(--surface2);border-radius:12px;padding:16px;text-align:center;">
+    <div style="font-size:24px;margin-bottom:6px;">{{ icon }}</div>
+    <div style="font-size:13px;font-weight:600;">{{ label }}</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ desc }}</div>
+  </div>
+  {% endfor %}
+</div>
 
-        p {
-            color: #777;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            text-decoration: none;
-            color: white;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        .register {
-            background: #28a745;
-        }
-
-        .login {
-            background: #007bff;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: scale(1.03);
-        }
-
-        footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #aaa;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>💰 AI Expense Tracker</h1>
-        <p>Manage your daily expenses smartly using AI</p>
-
-        <a href="/register" class="btn register">Register</a>
-        <a href="/login" class="btn login">Login</a>
-
-        <footer>Mini Project by Soul 💙</footer>
-    </div>
-</body>
-</html>
+<a href="/register" class="btn-block btn-success" style="margin-bottom:10px;">🚀 Get Started Free</a>
+<a href="/login"    class="btn-block btn-primary">🔐 Sign In</a>
+{% endblock %}

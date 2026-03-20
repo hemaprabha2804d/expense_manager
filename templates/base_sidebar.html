@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}AI Expense Tracker{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sidebar-w: 240px;
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
+      --accent: #6c63ff; --accent2: #fc5c7d;
+      --green: #43e97b; --yellow: #f7971e;
+      --text: #e2e8f0; --muted: #8892a4;
+      --border: rgba(255,255,255,0.07); --radius: 14px;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; padding: 28px 0;
+    }
+    .sidebar-logo { display: flex; align-items: center; gap: 12px; padding: 0 22px 28px; border-bottom: 1px solid var(--border); }
+    .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .logo-text { font-size: 15px; font-weight: 700; line-height: 1.2; }
+    .logo-text span { display: block; font-size: 11px; font-weight: 400; color: var(--muted); }
+    .nav-section { margin-top: 24px; padding: 0 12px; }
+    .nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; padding: 0 10px 8px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; transition: all .2s; margin-bottom: 2px; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: linear-gradient(135deg,rgba(108,99,255,.25),rgba(252,92,125,.15)); color: var(--text); }
+    .nav-item.active .nav-icon { color: var(--accent); }
+    .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+    .nav-divider { height: 1px; background: var(--border); margin: 16px 10px; }
+    .nav-logout { margin-top: auto; padding: 0 12px; }
+    .nav-logout .nav-item { color: var(--accent2); }
+    .nav-logout .nav-item:hover { background: rgba(252,92,125,.12); color: var(--accent2); }
+
+    /* ── MAIN ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; padding: 32px; overflow-y: auto; }
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 22px; font-weight: 700; }
+    .page-header p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    /* ── CARD ── */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .card-title { font-size: 15px; font-weight: 600; }
+    .card-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: rgba(108,99,255,.15); color: var(--accent); }
+
+    /* ── FORM ELEMENTS ── */
+    label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+    input[type="text"], input[type="number"], input[type="password"], input[type="date"], select, textarea {
+      width: 100%; padding: 11px 14px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 14px; font-family: 'Inter', sans-serif; outline: none; transition: border-color .2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    select option { background: var(--surface2); }
+    .form-group { margin-bottom: 18px; }
+
+    /* ── BUTTONS ── */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 11px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all .2s; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), #8b84ff); color: white; }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-danger { background: linear-gradient(135deg, var(--accent2), #ff8a65); color: white; }
+    .btn-danger:hover { opacity: .88; }
+    .btn-ghost { background: var(--surface2); color: var(--muted); }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+    /* ── TABLE ── */
+    table { width: 100%; border-collapse: collapse; }
+    thead th { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; padding: 0 12px 12px; text-align: left; }
+    tbody tr { border-top: 1px solid var(--border); transition: background .15s; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 13px 12px; font-size: 14px; }
+
+    /* ── CATEGORY PILLS ── */
+    .cat-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .cat-Food          { background: rgba(252,92,125,.15); color: #fc5c7d; }
+    .cat-Travel        { background: rgba(108,99,255,.15); color: #6c63ff; }
+    .cat-Shopping      { background: rgba(247,151,30,.15);  color: #f7971e; }
+    .cat-Bills         { background: rgba(67,233,123,.15);  color: #43e97b; }
+    .cat-Entertainment { background: rgba(0,210,255,.15);   color: #00d2ff; }
+    .cat-Other         { background: rgba(255,255,255,.08); color: var(--muted); }
+
+    /* ── MISC ── */
+    .amount-cell { font-weight: 600; color: var(--accent2); }
+    .empty-state { text-align: center; padding: 48px; color: var(--muted); font-size: 14px; }
+    .empty-state .e-icon { font-size: 40px; margin-bottom: 10px; display: block; }
+    .alert { display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg,rgba(108,99,255,.18),rgba(252,92,125,.12)); border: 1px solid rgba(108,99,255,.3); border-radius: 10px; padding: 12px 16px; font-size: 13px; margin-bottom: 24px; }
+
+    {% block styles %}{% endblock %}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">💰</div>
+    <div class="logo-text">AI Expense<span>Tracker</span></div>
+  </div>
+
+  <nav class="nav-section">
+    <div class="nav-label">Main Menu</div>
+    <a href="/dashboard"      class="nav-item {% if current_path == '/dashboard' %}active{% endif %}"><span class="nav-icon">🏠</span> Dashboard</a>
+    <a href="/add-expense-page" class="nav-item {% if current_path == '/add-expense-page' %}active{% endif %}"><span class="nav-icon">➕</span> Add Expense</a>
+    <a href="/view-expenses"  class="nav-item {% if current_path == '/view-expenses' %}active{% endif %}"><span class="nav-icon">📋</span> View Expenses</a>
+    <a href="/reports"        class="nav-item {% if current_path == '/reports' %}active{% endif %}"><span class="nav-icon">📊</span> Reports</a>
+    <div class="nav-divider"></div>
+    <div class="nav-label">Tools</div>
+    <a href="#" class="nav-item"><span class="nav-icon">💡</span> Budget Planner</a>
+    <a href="#" class="nav-item"><span class="nav-icon">🏷️</span> Categories</a>
+    <a href="#" class="nav-item"><span class="nav-icon">🤖</span> AI Suggestions</a>
+  </nav>
+
+  <div class="nav-logout">
+    <div class="nav-divider"></div>
+    <a href="/" class="nav-item"><span class="nav-icon">🚪</span> Logout</a>
+  </div>
+</aside>
+
+<main class="main">
+  {% block content %}{% endblock %}
+</main>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

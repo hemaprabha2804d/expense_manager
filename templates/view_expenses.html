@@ -1,85 +1,55 @@
-<!DOCTYPE html>
-<html>
-<head>
+{% extends 'base_sidebar.html' %}
+{% block title %}View Expenses – AI Expense Tracker{% endblock %}
 
-<title>View Expenses</title>
+{% block styles %}
+.action-btns { display:flex; gap:8px; }
+{% endblock %}
 
-<style>
+{% block content %}
+<div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+  <div>
+    <h1>📋 All Expenses</h1>
+    <p>{{ expenses|length }} record{{ 's' if expenses|length != 1 else '' }} found</p>
+  </div>
+  <a href="/add-expense-page" class="btn btn-primary">➕ Add New</a>
+</div>
 
-body{
-    font-family:Arial;
-    background:linear-gradient(to right,#36d1dc,#5b86e5);
-    text-align:center;
-}
-
-h1{
-    margin-top:40px;
-    color:white;
-}
-
-table{
-    margin:40px auto;
-    border-collapse:collapse;
-    width:70%;
-    background:white;
-    border-radius:10px;
-    overflow:hidden;
-}
-
-th,td{
-    padding:12px;
-    border-bottom:1px solid #ddd;
-}
-
-th{
-    background:#333;
-    color:white;
-}
-
-tr:hover{
-    background:#f2f2f2;
-}
-
-.btn{
-    display:inline-block;
-    margin-top:20px;
-    padding:10px 20px;
-    background:#333;
-    color:white;
-    text-decoration:none;
-    border-radius:8px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h1>📊 Your Expenses</h1>
-
-<table>
-
-<tr>
-<th>Category</th>
-<th>Amount</th>
-<th>Date</th>
-</tr>
-
-{% for exp in expenses %}
-
-<tr>
-<td>{{ exp.category }}</td>
-<td>₹ {{ exp.amount }}</td>
-<td>{{ exp.date }}</td>
-</tr>
-
-{% endfor %}
-
-</table>
-
-<a href="/dashboard" class="btn">Back to Dashboard</a>
-
-</body>
-
-</html>
+<div class="card">
+  {% if expenses %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Category</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for exp in expenses %}
+      <tr>
+        <td style="color:var(--muted);font-size:12px;">{{ loop.index }}</td>
+        <td><span class="cat-pill cat-{{ exp.category }}">{{ exp.category }}</span></td>
+        <td class="amount-cell">₹{{ exp.amount }}</td>
+        <td style="color:var(--muted);">{{ exp.date or '—' }}</td>
+        <td>
+          <div class="action-btns">
+            <a href="/edit-expense/{{ exp._id }}" class="btn btn-ghost btn-sm">✏️ Edit</a>
+            <a href="/delete-expense/{{ exp._id }}" class="btn btn-danger btn-sm"
+               onclick="return confirm('Delete this expense?')">🗑️ Delete</a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <span class="e-icon">💳</span>
+    No expenses recorded yet.<br>
+    <a href="/add-expense-page" style="color:var(--accent);margin-top:8px;display:inline-block;">+ Add your first expense</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

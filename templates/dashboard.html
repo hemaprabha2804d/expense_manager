@@ -1,538 +1,104 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard – AI Expense Tracker</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+{% extends 'base_sidebar.html' %}
+{% block title %}Dashboard – AI Expense Tracker{% endblock %}
 
-    :root {
-      --sidebar-w: 240px;
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --surface2: #22263a;
-      --accent: #6c63ff;
-      --accent2: #fc5c7d;
-      --green: #43e97b;
-      --yellow: #f7971e;
-      --text: #e2e8f0;
-      --muted: #8892a4;
-      --border: rgba(255,255,255,0.07);
-      --radius: 14px;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* ── SIDEBAR ─────────────────────────────────────── */
-    .sidebar {
-      width: var(--sidebar-w);
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      z-index: 100;
-      padding: 28px 0;
-    }
-
-    .sidebar-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 0 22px 28px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .logo-icon {
-      width: 40px; height: 40px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-    }
-
-    .logo-text { font-size: 15px; font-weight: 700; line-height: 1.2; }
-    .logo-text span { display: block; font-size: 11px; font-weight: 400; color: var(--muted); }
-
-    .nav-section { margin-top: 24px; padding: 0 12px; }
-    .nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; padding: 0 10px 8px; }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 11px 14px;
-      border-radius: 10px;
-      text-decoration: none;
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 500;
-      transition: all .2s;
-      margin-bottom: 2px;
-    }
-
-    .nav-item:hover { background: var(--surface2); color: var(--text); }
-    .nav-item.active { background: linear-gradient(135deg, rgba(108,99,255,.25), rgba(252,92,125,.15)); color: var(--text); }
-    .nav-item.active .nav-icon { color: var(--accent); }
-
-    .nav-icon { font-size: 18px; width: 22px; text-align: center; }
-
-    .nav-divider { height: 1px; background: var(--border); margin: 16px 10px; }
-
-    .nav-logout { margin-top: auto; padding: 0 12px; }
-    .nav-logout .nav-item { color: var(--accent2); }
-    .nav-logout .nav-item:hover { background: rgba(252,92,125,.12); color: var(--accent2); }
-
-    /* ── MAIN CONTENT ────────────────────────────────── */
-    .main {
-      margin-left: var(--sidebar-w);
-      flex: 1;
-      padding: 32px;
-      overflow-y: auto;
-    }
-
-    /* ── TOPBAR ──────────────────────────────────────── */
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 28px;
-    }
-
-    .topbar-title h1 { font-size: 22px; font-weight: 700; }
-    .topbar-title p  { font-size: 13px; color: var(--muted); margin-top: 3px; }
-
-    .ai-banner {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: linear-gradient(135deg, rgba(108,99,255,.18), rgba(252,92,125,.12));
-      border: 1px solid rgba(108,99,255,.3);
-      border-radius: 10px;
-      padding: 11px 16px;
-      font-size: 13px;
-      max-width: 420px;
-    }
-
-    .ai-banner span { color: var(--muted); }
-
-    /* ── STAT CARDS ──────────────────────────────────── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-      margin-bottom: 28px;
-    }
-
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 22px;
-      position: relative;
-      overflow: hidden;
-      transition: transform .2s;
-    }
-
-    .stat-card:hover { transform: translateY(-3px); }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; right: 0;
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      filter: blur(28px);
-      opacity: .5;
-    }
-
-    .stat-card:nth-child(1)::before { background: var(--accent); }
-    .stat-card:nth-child(2)::before { background: var(--green); }
-    .stat-card:nth-child(3)::before { background: var(--yellow); }
-    .stat-card:nth-child(4)::before { background: var(--accent2); }
-
-    .stat-icon {
-      font-size: 22px;
-      margin-bottom: 12px;
-      display: block;
-    }
-
-    .stat-value {
-      font-size: 26px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; }
-
-    /* ── CHARTS ROW ──────────────────────────────────── */
-    .charts-row {
-      display: grid;
-      grid-template-columns: 1fr 1.6fr;
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    .chart-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .card-title { font-size: 15px; font-weight: 600; }
-    .card-badge {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: rgba(108,99,255,.15);
-      color: var(--accent);
-    }
-
-    .chart-wrap {
-      position: relative;
-      display: flex;
-      justify-content: center;
-    }
-
-    .doughnut-wrap { max-width: 240px; margin: 0 auto; }
-
-    /* ── RECENT TABLE ────────────────────────────────── */
-    .recent-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead th {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      padding: 0 12px 12px;
-      text-align: left;
-    }
-
-    tbody tr {
-      border-top: 1px solid var(--border);
-      transition: background .15s;
-    }
-
-    tbody tr:hover { background: var(--surface2); }
-
-    tbody td {
-      padding: 13px 12px;
-      font-size: 14px;
-    }
-
-    .cat-pill {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .cat-Food          { background: rgba(252,92,125,.15); color: #fc5c7d; }
-    .cat-Travel        { background: rgba(108,99,255,.15); color: #6c63ff; }
-    .cat-Shopping      { background: rgba(247,151,30,.15); color: #f7971e; }
-    .cat-Bills         { background: rgba(67,233,123,.15); color: #43e97b; }
-    .cat-Entertainment { background: rgba(0,210,255,.15);  color: #00d2ff; }
-    .cat-Other         { background: rgba(255,255,255,.08); color: var(--muted); }
-
-    .amount-cell { font-weight: 600; color: var(--accent2); }
-
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .empty-state .e-icon { font-size: 40px; margin-bottom: 10px; display: block; }
-  </style>
-</head>
-<body>
-
-<!-- ════════════ SIDEBAR ════════════ -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-icon">💰</div>
-    <div class="logo-text">
-      AI Expense
-      <span>Tracker</span>
-    </div>
+{% block content %}
+<div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+  <div>
+    <h1>👋 Welcome Back!</h1>
+    <p>Here's your expense overview</p>
   </div>
-
-  <nav class="nav-section">
-    <div class="nav-label">Main Menu</div>
-
-    <a href="/dashboard" class="nav-item active">
-      <span class="nav-icon">🏠</span> Dashboard
-    </a>
-
-    <a href="/add-expense-page" class="nav-item">
-      <span class="nav-icon">➕</span> Add Expense
-    </a>
-
-    <a href="/view-expenses" class="nav-item">
-      <span class="nav-icon">📋</span> View Expenses
-    </a>
-
-    <a href="/reports" class="nav-item">
-      <span class="nav-icon">📊</span> Reports
-    </a>
-
-    <div class="nav-divider"></div>
-
-    <div class="nav-label">Tools</div>
-
-    <a href="#" class="nav-item">
-      <span class="nav-icon">💡</span> Budget Planner
-    </a>
-
-    <a href="#" class="nav-item">
-      <span class="nav-icon">🏷️</span> Categories
-    </a>
-
-    <a href="#" class="nav-item">
-      <span class="nav-icon">🤖</span> AI Suggestions
-    </a>
-  </nav>
-
-  <div class="nav-logout">
-    <div class="nav-divider"></div>
-    <a href="/" class="nav-item">
-      <span class="nav-icon">🚪</span> Logout
-    </a>
-  </div>
-</aside>
-
-<!-- ════════════ MAIN CONTENT ════════════ -->
-<main class="main">
-
-  <!-- Topbar -->
-  <div class="topbar">
-    <div class="topbar-title">
-      <h1>👋 Welcome Back!</h1>
-      <p>Here's your expense overview for today</p>
-    </div>
-
-    {% if suggestion %}
-    <div class="ai-banner">
-      🤖 <span>{{ suggestion }}</span>
-    </div>
-    {% endif %}
-  </div>
-
-  <!-- Stat Cards -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <span class="stat-icon">💸</span>
-      <div class="stat-value">₹{{ total_amount }}</div>
-      <div class="stat-label">Total Spent (All Time)</div>
-    </div>
-    <div class="stat-card">
-      <span class="stat-icon">📅</span>
-      <div class="stat-value">₹{{ monthly_this }}</div>
-      <div class="stat-label">Spent This Month</div>
-    </div>
-    <div class="stat-card">
-      <span class="stat-icon">📉</span>
-      <div class="stat-value">₹{{ avg_expense }}</div>
-      <div class="stat-label">Avg Per Expense</div>
-    </div>
-    <div class="stat-card">
-      <span class="stat-icon">🏆</span>
-      <div class="stat-value" style="font-size:18px;">{{ highest_cat }}</div>
-      <div class="stat-label">Top Spending Category</div>
-    </div>
-  </div>
-
-  <!-- Charts Row -->
-  <div class="charts-row">
-
-    <!-- Doughnut Chart -->
-    <div class="chart-card">
-      <div class="card-header">
-        <div class="card-title">Spending by Category</div>
-        <div class="card-badge">Doughnut</div>
-      </div>
-      <div class="chart-wrap doughnut-wrap">
-        {% if total_count > 0 %}
-          <canvas id="catChart"></canvas>
-        {% else %}
-          <div class="empty-state">
-            <span class="e-icon">🗂️</span>
-            No expenses yet
-          </div>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- Bar Chart -->
-    <div class="chart-card">
-      <div class="card-header">
-        <div class="card-title">Monthly Spending Trend</div>
-        <div class="card-badge">Last 6 Months</div>
-      </div>
-      <div class="chart-wrap">
-        <canvas id="monthChart" style="width:100%;"></canvas>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Recent Expenses Table -->
-  <div class="recent-card">
-    <div class="card-header">
-      <div class="card-title">Recent Expenses</div>
-      <a href="/view-expenses" style="font-size:13px;color:var(--accent);text-decoration:none;font-weight:500;">View all →</a>
-    </div>
-
-    {% if recent %}
-    <table>
-      <thead>
-        <tr>
-          <th>Category</th>
-          <th>Amount</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for exp in recent %}
-        <tr>
-          <td><span class="cat-pill cat-{{ exp.category }}">{{ exp.category }}</span></td>
-          <td class="amount-cell">₹{{ exp.amount }}</td>
-          <td style="color:var(--muted);">{{ exp.date }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="empty-state">
-      <span class="e-icon">💳</span>
-      No expenses recorded yet. <a href="/add-expense-page" style="color:var(--accent);">Add one!</a>
-    </div>
-    {% endif %}
-  </div>
-
-</main>
-
-<!-- ════════════ CHART.JS ════════════ -->
-<script>
-  const COLORS = ['#6c63ff','#fc5c7d','#43e97b','#f7971e','#00d2ff','#a29bfe'];
-
-  // ── Doughnut: Category ──
-  {% if total_count > 0 %}
-  (function(){
-    const catLabels = {{ cat_labels | safe }};
-    const catValues = {{ cat_values | safe }};
-    const ctx = document.getElementById('catChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: catLabels,
-        datasets: [{
-          data: catValues,
-          backgroundColor: COLORS.slice(0, catLabels.length),
-          borderWidth: 0,
-          hoverOffset: 8
-        }]
-      },
-      options: {
-        cutout: '68%',
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { color: '#8892a4', font: { size: 12 }, padding: 14, boxWidth: 12 }
-          },
-          tooltip: {
-            callbacks: {
-              label: ctx => ` ₹${ctx.parsed.toLocaleString()}`
-            }
-          }
-        }
-      }
-    });
-  })();
+  {% if suggestion %}
+  <div class="alert">🤖 <span>{{ suggestion }}</span></div>
   {% endif %}
+</div>
 
-  // ── Bar: Monthly Trend ──
-  (function(){
-    const monthLabels = {{ month_labels | safe }};
-    const monthValues = {{ month_values | safe }};
-    const ctx = document.getElementById('monthChart').getContext('2d');
+<!-- Stat Cards -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:24px;">
+  {% set cards = [
+    ('💸','₹'~total_amount,'Total Spent','var(--accent)'),
+    ('📅','₹'~monthly_this,'This Month','var(--green)'),
+    ('📉','₹'~avg_expense,'Avg / Expense','var(--yellow)'),
+    ('🏆',highest_cat,'Top Category','var(--accent2)')
+  ] %}
+  {% for icon,val,label,color in cards %}
+  <div class="card" style="position:relative;overflow:hidden;transition:transform .2s;" onmouseenter="this.style.transform='translateY(-3px)'" onmouseleave="this.style.transform=''">
+    <div style="position:absolute;top:-10px;right:-10px;width:80px;height:80px;border-radius:50%;background:{{color}};filter:blur(30px);opacity:.4;"></div>
+    <div style="font-size:22px;margin-bottom:10px;">{{ icon }}</div>
+    <div style="font-size:24px;font-weight:700;margin-bottom:4px;">{{ val }}</div>
+    <div style="font-size:12px;color:var(--muted);font-weight:500;">{{ label }}</div>
+  </div>
+  {% endfor %}
+</div>
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, 280);
-    gradient.addColorStop(0, 'rgba(108,99,255,0.8)');
-    gradient.addColorStop(1, 'rgba(252,92,125,0.4)');
+<!-- Charts Row -->
+<div style="display:grid;grid-template-columns:1fr 1.7fr;gap:20px;margin-bottom:24px;">
 
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: monthLabels,
-        datasets: [{
-          label: 'Total Spent (₹)',
-          data: monthValues,
-          backgroundColor: gradient,
-          borderRadius: 8,
-          borderSkipped: false,
-          hoverBackgroundColor: 'rgba(108,99,255,1)'
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => ` ₹${ctx.parsed.y.toLocaleString()}`
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: { color: 'rgba(255,255,255,0.04)' },
-            ticks: { color: '#8892a4', font: { size: 12 } }
-          },
-          y: {
-            grid: { color: 'rgba(255,255,255,0.06)' },
-            ticks: {
-              color: '#8892a4',
-              font: { size: 12 },
-              callback: v => '₹' + v.toLocaleString()
-            }
-          }
-        }
-      }
-    });
-  })();
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">By Category</div>
+      <div class="card-badge">Doughnut</div>
+    </div>
+    {% if total_count > 0 %}
+      <div style="max-width:220px;margin:0 auto;"><canvas id="catChart"></canvas></div>
+    {% else %}
+      <div class="empty-state"><span class="e-icon">🗂️</span>No data yet</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Monthly Trend</div>
+      <div class="card-badge">Last 6 Months</div>
+    </div>
+    <canvas id="monthChart"></canvas>
+  </div>
+
+</div>
+
+<!-- Recent Expenses -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Recent Expenses</div>
+    <a href="/view-expenses" style="font-size:13px;color:var(--accent);text-decoration:none;font-weight:500;">View all →</a>
+  </div>
+  {% if recent %}
+  <table>
+    <thead><tr><th>Category</th><th>Amount</th><th>Date</th><th></th></tr></thead>
+    <tbody>
+      {% for exp in recent %}
+      <tr>
+        <td><span class="cat-pill cat-{{ exp.category }}">{{ exp.category }}</span></td>
+        <td class="amount-cell">₹{{ exp.amount }}</td>
+        <td style="color:var(--muted);">{{ exp.date }}</td>
+        <td><a href="/edit-expense/{{ exp._id }}" class="btn btn-ghost btn-sm">✏️ Edit</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <span class="e-icon">💳</span>
+    No expenses yet. <a href="/add-expense-page" style="color:var(--accent);">Add one!</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const COLORS = ['#6c63ff','#fc5c7d','#43e97b','#f7971e','#00d2ff','#a29bfe'];
+{% if total_count > 0 %}
+new Chart(document.getElementById('catChart').getContext('2d'), {
+  type:'doughnut',
+  data:{labels:{{ cat_labels|safe }},datasets:[{data:{{ cat_values|safe }},backgroundColor:COLORS,borderWidth:0,hoverOffset:8}]},
+  options:{cutout:'68%',plugins:{legend:{position:'bottom',labels:{color:'#8892a4',font:{size:11},padding:12,boxWidth:10}},tooltip:{callbacks:{label:c=>' ₹'+c.parsed.toLocaleString()}}}}
+});
+{% endif %}
+(function(){
+  const ctx = document.getElementById('monthChart').getContext('2d');
+  const g = ctx.createLinearGradient(0,0,0,260);
+  g.addColorStop(0,'rgba(108,99,255,0.85)'); g.addColorStop(1,'rgba(252,92,125,0.4)');
+  new Chart(ctx,{type:'bar',data:{labels:{{ month_labels|safe }},datasets:[{label:'Spent (₹)',data:{{ month_values|safe }},backgroundColor:g,borderRadius:8,borderSkipped:false,hoverBackgroundColor:'rgba(108,99,255,1)'}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' ₹'+c.parsed.y.toLocaleString()}}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#8892a4'}},y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'#8892a4',callback:v=>'₹'+v.toLocaleString()}}}}});
+})();
 </script>
-</body>
-</html>
+{% endblock %}

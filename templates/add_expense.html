@@ -1,117 +1,68 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Expense - AI Expense Tracker</title>
+{% extends 'base_sidebar.html' %}
+{% block title %}Add Expense – AI Expense Tracker{% endblock %}
 
-    <style>
-
-        body{
-            margin:0;
-            font-family:Arial, sans-serif;
-            background: linear-gradient(to right, #667eea, #764ba2);
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-        }
-
-        .container{
-            background:white;
-            padding:40px;
-            border-radius:15px;
-            width:350px;
-            box-shadow:0 10px 25px rgba(0,0,0,0.2);
-            text-align:center;
-        }
-
-        h2{
-            margin-bottom:20px;
-            color:#333;
-        }
-
-        label{
-            display:block;
-            text-align:left;
-            margin-top:15px;
-            font-weight:bold;
-            color:#444;
-        }
-
-        input,select{
-            width:100%;
-            padding:10px;
-            margin-top:5px;
-            border-radius:8px;
-            border:1px solid #ccc;
-            font-size:14px;
-        }
-
-        input:focus,select:focus{
-            outline:none;
-            border-color:#667eea;
-        }
-
-        .btn{
-            margin-top:20px;
-            width:100%;
-            padding:12px;
-            border:none;
-            border-radius:8px;
-            background:#667eea;
-            color:white;
-            font-size:16px;
-            cursor:pointer;
-        }
-
-        .btn:hover{
-            background:#5a67d8;
-        }
-
-        .back{
-            display:inline-block;
-            margin-top:15px;
-            text-decoration:none;
-            color:#555;
-            font-size:14px;
-        }
-
-        .back:hover{
-            color:#000;
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-<h2>💰 Add Expense</h2>
-
-<form action="/add-expense" method="POST">
-
-<label>Amount</label>
-<input type="number" name="amount" placeholder="Enter amount" required>
-
-<label>Category</label>
-<select name="category">
-<option>Food</option>
-<option>Travel</option>
-<option>Shopping</option>
-<option>Bills</option>
-<option>Entertainment</option>
-</select>
-<label>Date</label>
-<input type="date" name="date" required>
-
-<button class="btn" type="submit">Add Expense</button>
-
-</form>
-
-<a class="back" href="/dashboard">⬅ Back to Dashboard</a>
-
+{% block content %}
+<div class="page-header">
+  <h1>➕ Add Expense</h1>
+  <p>Record a new expense to track your spending</p>
 </div>
 
-</body>
-</html>
+<div style="max-width:520px;">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Expense Details</div>
+      <div class="card-badge">New Entry</div>
+    </div>
+
+    <form action="/add-expense" method="POST">
+
+      <div class="form-group">
+        <label>💰 Amount (₹)</label>
+        <input type="number" name="amount" placeholder="e.g. 500" min="1" required/>
+      </div>
+
+      <div class="form-group">
+        <label>🏷️ Category</label>
+        <select name="category">
+          <option>Food</option>
+          <option>Travel</option>
+          <option>Shopping</option>
+          <option>Bills</option>
+          <option>Entertainment</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>📅 Date</label>
+        <input type="date" name="date" required/>
+      </div>
+
+      <div class="form-group">
+        <label>📝 Note (optional)</label>
+        <textarea name="note" rows="3" placeholder="Any additional details…" style="resize:vertical;"></textarea>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button class="btn btn-primary" type="submit" style="flex:1;">✅ Save Expense</button>
+        <a href="/dashboard" class="btn btn-ghost">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Quick Tips -->
+  <div class="card" style="margin-top:18px;">
+    <div class="card-header">
+      <div class="card-title">💡 Spending Tips</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--muted);">
+      <div>🍔 <strong style="color:var(--text);">Food</strong> — Try to cook at home more often</div>
+      <div>🚗 <strong style="color:var(--text);">Travel</strong> — Consider public transport for daily commute</div>
+      <div>🛍️ <strong style="color:var(--text);">Shopping</strong> — Set a monthly shopping limit</div>
+      <div>💡 <strong style="color:var(--text);">Bills</strong> — Review subscriptions periodically</div>
+      <div>🎬 <strong style="color:var(--text);">Entertainment</strong> — Balance fun with savings goals</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
