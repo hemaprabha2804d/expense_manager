@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Expense - AI Expense Tracker</title>
+
+    <style>
+
+        body{
+            margin:0;
+            font-family:Arial, sans-serif;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .container{
+            background:white;
+            padding:40px;
+            border-radius:15px;
+            width:350px;
+            box-shadow:0 10px 25px rgba(0,0,0,0.2);
+            text-align:center;
+        }
+
+        h2{
+            margin-bottom:20px;
+            color:#333;
+        }
+
+        label{
+            display:block;
+            text-align:left;
+            margin-top:15px;
+            font-weight:bold;
+            color:#444;
+        }
+
+        input,select{
+            width:100%;
+            padding:10px;
+            margin-top:5px;
+            border-radius:8px;
+            border:1px solid #ccc;
+            font-size:14px;
+        }
+
+        input:focus,select:focus{
+            outline:none;
+            border-color:#667eea;
+        }
+
+        .btn{
+            margin-top:20px;
+            width:100%;
+            padding:12px;
+            border:none;
+            border-radius:8px;
+            background:#667eea;
+            color:white;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        .btn:hover{
+            background:#5a67d8;
+        }
+
+        .back{
+            display:inline-block;
+            margin-top:15px;
+            text-decoration:none;
+            color:#555;
+            font-size:14px;
+        }
+
+        .back:hover{
+            color:#000;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>💰 Add Expense</h2>
+
+<form action="/add-expense" method="POST">
+
+<label>Amount</label>
+<input type="number" name="amount" placeholder="Enter amount" required>
+
+<label>Category</label>
+<select name="category">
+<option>Food</option>
+<option>Travel</option>
+<option>Shopping</option>
+<option>Bills</option>
+<option>Entertainment</option>
+</select>
+<label>Date</label>
+<input type="date" name="date" required>
+
+<button class="btn" type="submit">Add Expense</button>
+
+</form>
+
+<a class="back" href="/dashboard">⬅ Back to Dashboard</a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Expense Reports</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:linear-gradient(to right,#ff9966,#ff5e62);
+    text-align:center;
+}
+
+.container{
+    margin-top:100px;
+}
+
+.card{
+    display:inline-block;
+    background:white;
+    padding:30px;
+    margin:20px;
+    border-radius:12px;
+    width:250px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.2);
+}
+
+h1{
+    color:white;
+}
+
+.btn{
+    padding:10px 20px;
+    background:#333;
+    color:white;
+    text-decoration:none;
+    border-radius:8px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>📊 Expense Reports</h1>
+
+<div class="container">
+
+<div class="card">
+<h2>Monthly Expense</h2>
+<h3>₹ {{ monthly_total }}</h3>
+</div>
+
+<div class="card">
+<h2>Yearly Expense</h2>
+<h3>₹ {{ yearly_total }}</h3>
+</div>
+
+</div>
+
+<br>
+
+<a href="/dashboard" class="btn">Back to Dashboard</a>
+
+</body>
+</html>
