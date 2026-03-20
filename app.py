@@ -12,6 +12,7 @@ client = MongoClient("mongodb://localhost:27017/")
 db = client["expense_tracker"]
 users_collection    = db["users"]
 expenses_collection = db["expenses"]
+income_collection   = db["income"]  # 🔴 NEW: Income Collection
 
 
 # ── Context processor: inject current_path for active nav ────────────────────
@@ -23,6 +24,7 @@ def inject_current_path():
 # ── Helper: build all chart + stats data ─────────────────────────────────────
 def get_dashboard_data():
     expenses = list(expenses_collection.find())
+    income   = list(income_collection.find())  # 🔴 Fetch Income
     now = datetime.now()
 
     category_totals = defaultdict(int)
@@ -47,6 +49,10 @@ def get_dashboard_data():
                     monthly_this += amt
             except Exception:
                 pass
+
+    # 🔴 Income Calculations
+    total_income = sum(i.get("amount", 0) for i in income)
+    net_balance  = total_income - total_amount
 
     # Last 6 months labels + values
     from calendar import month_abbr
@@ -78,6 +84,8 @@ def get_dashboard_data():
         "highest_cat":  highest_cat,
         "recent":       recent,
         "total_count":  len(expenses),
+        "total_income": total_income,    # 🔴 Added Income
+        "net_balance":  net_balance       # 🔴 Added Net Balance
     }
 
 
@@ -131,8 +139,11 @@ def view_expenses():
 @app.route("/reports")
 def reports():
     expenses      = list(expenses_collection.find())
+    income        = list(income_collection.find()) # 🔴 Fetch Income
     monthly_total = 0
     yearly_total  = 0
+    monthly_income = 0 # 🔴 Monthly Income total
+    yearly_income  = 0 # 🔴 Yearly Income total
     current_month = datetime.now().month
     current_year  = datetime.now().year
 
@@ -158,6 +169,21 @@ def reports():
             except Exception:
                 pass
 
+    # 🔴 Income accounting for Reports
+    for inc in income:
+        amt = inc.get("amount", 0)
+        date_str = inc.get("date", "")
+
+        if date_str:
+            try:
+                d = datetime.strptime(date_str, "%Y-%m-%d")
+                if d.year == current_year:
+                    yearly_income += amt
+                if d.year == current_year and d.month == current_month:
+                    monthly_income += amt
+            except Exception:
+                pass
+
     cat_data = []
     for name, vals in sorted(cat_totals.items(), key=lambda x: -x[1]["total"]):
         pct = round(vals["total"] / grand_total * 100) if grand_total else 0
@@ -167,6 +193,8 @@ def reports():
         "reports.html",
         monthly_total=monthly_total,
         yearly_total=yearly_total,
+        monthly_income=monthly_income, # 🔴 Pass to View
+        yearly_income=yearly_income,   # 🔴 Pass to View
         cat_data=cat_data
     )
 
@@ -207,6 +235,28 @@ def add_expense():
     suggestion += f" | Avg expense: ₹{data['avg_expense']}"
 
     return render_template("dashboard.html", suggestion=suggestion, **data)
+
+
+# ── 🔴 NEW: Add Income Page ────────────────────────────────────────────────────
+@app.route("/add-income-page")
+def add_income_page():
+    return render_template("add_income.html")
+
+
+# ── 🔴 NEW: Add Income (POST) ──────────────────────────────────────────────────
+@app.route("/add-income", methods=["POST"])
+def add_income():
+    amount = int(request.form["amount"])
+    source = request.form["source"]  # Using "source" for income type
+    date   = request.form.get("date")
+    note   = request.form.get("note", "")
+
+    income_collection.insert_one({
+        "amount": amount, "source": source, "date": date, "note": note
+    })
+
+    data = get_dashboard_data()
+    return render_template("dashboard.html", suggestion="Income Added Successfully!", **data)
 
 
 # ── Edit Expense (GET – show form) ────────────────────────────────────────────

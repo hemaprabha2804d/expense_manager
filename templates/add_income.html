@@ -1,0 +1,55 @@
+{% extends 'base_sidebar.html' %}
+{% block title %}Add Income – AI Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>➕ Add Income</h1>
+  <p>Record a new income source to track your revenue</p>
+</div>
+
+<div style="max-width:520px;">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Income Details</div>
+      <div class="card-badge">New Entry</div>
+    </div>
+
+    <form action="/add-income" method="POST">
+
+      <div class="form-group">
+        <label>💰 Amount (₹)</label>
+        <input type="number" name="amount" placeholder="e.g. 5000" min="1" required/>
+      </div>
+
+      <div class="form-group">
+        <label>🏷️ Source</label>
+        <select name="source">
+          <option>Salary</option>
+          <option>Freelance</option>
+          <option>Business</option>
+          <option>Investment</option>
+          <option>Rent</option>
+          <option>Gift</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>📅 Date</label>
+        <input type="date" name="date" required/>
+      </div>
+
+      <div class="form-group">
+        <label>📝 Note (optional)</label>
+        <textarea name="note" rows="3" placeholder="Any additional details…" style="resize:vertical;"></textarea>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button class="btn btn-primary" type="submit" style="flex:1;">✅ Save Income</button>
+        <a href="/dashboard" class="btn btn-ghost">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

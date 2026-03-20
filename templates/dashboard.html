@@ -15,10 +15,10 @@
 <!-- Stat Cards -->
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:24px;">
   {% set cards = [
+    ('💰','₹'~total_income,'Total Income','var(--green)'),
     ('💸','₹'~total_amount,'Total Spent','var(--accent)'),
-    ('📅','₹'~monthly_this,'This Month','var(--green)'),
-    ('📉','₹'~avg_expense,'Avg / Expense','var(--yellow)'),
-    ('🏆',highest_cat,'Top Category','var(--accent2)')
+    ('⚖️','₹'~net_balance,'Net Balance','var(--yellow)'),
+    ('🏆',highest_cat,'Top Spending','var(--accent2)')
   ] %}
   {% for icon,val,label,color in cards %}
   <div class="card" style="position:relative;overflow:hidden;transition:transform .2s;" onmouseenter="this.style.transform='translateY(-3px)'" onmouseleave="this.style.transform=''">

@@ -105,9 +105,11 @@
   </div>
 
   <nav class="nav-section">
-    <div class="nav-label">Main Menu</div>
+    <a href="/add-expense-page" class="btn btn-primary btn-sm" style="margin: 3px 14px 10px; justify-content:center;">➕ Add Expense</a>
+    <a href="/add-income-page" class="btn btn-success btn-sm" style="margin: 0 14px 18px; justify-content:center; color:#0f1117;">💰 Add Income</a>
+    <div class="nav-divider" style="margin-top:0;"></div>
+    
     <a href="/dashboard"      class="nav-item {% if current_path == '/dashboard' %}active{% endif %}"><span class="nav-icon">🏠</span> Dashboard</a>
-    <a href="/add-expense-page" class="nav-item {% if current_path == '/add-expense-page' %}active{% endif %}"><span class="nav-icon">➕</span> Add Expense</a>
     <a href="/view-expenses"  class="nav-item {% if current_path == '/view-expenses' %}active{% endif %}"><span class="nav-icon">📋</span> View Expenses</a>
     <a href="/reports"        class="nav-item {% if current_path == '/reports' %}active{% endif %}"><span class="nav-icon">📊</span> Reports</a>
     <div class="nav-divider"></div>

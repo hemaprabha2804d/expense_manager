@@ -10,18 +10,32 @@
 <!-- Summary Stats -->
 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:600px;margin-bottom:24px;">
 
-  <div class="card" style="position:relative;overflow:hidden;" >
-    <div style="position:absolute;top:-10px;right:-10px;width:80px;height:80px;background:var(--accent);border-radius:50%;filter:blur(30px);opacity:.35;"></div>
-    <div style="font-size:28px;margin-bottom:8px;">📅</div>
-    <div style="font-size:32px;font-weight:700;color:var(--accent);">₹{{ monthly_total }}</div>
-    <div style="font-size:13px;color:var(--muted);margin-top:4px;font-weight:500;">Spent This Month</div>
+  <div class="card" style="position:relative;overflow:hidden;">
+    <div style="font-size:24px;margin-bottom:8px;">📅 This Month</div>
+    <div style="display:flex;justify-content:space-between;margin-top:12px;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);">Income</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">₹{{ monthly_income }}</div>
+      </div>
+      <div style="border-left:1px solid var(--border);padding-left:15px;">
+        <div style="font-size:11px;color:var(--muted);">Expenses</div>
+        <div style="font-size:18px;font-weight:700;color:var(--accent2);">₹{{ monthly_total }}</div>
+      </div>
+    </div>
   </div>
 
   <div class="card" style="position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-10px;right:-10px;width:80px;height:80px;background:var(--accent2);border-radius:50%;filter:blur(30px);opacity:.35;"></div>
-    <div style="font-size:28px;margin-bottom:8px;">📆</div>
-    <div style="font-size:32px;font-weight:700;color:var(--accent2);">₹{{ yearly_total }}</div>
-    <div style="font-size:13px;color:var(--muted);margin-top:4px;font-weight:500;">Spent This Year</div>
+    <div style="font-size:24px;margin-bottom:8px;">📆 This Year</div>
+    <div style="display:flex;justify-content:space-between;margin-top:12px;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);">Income</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);">₹{{ yearly_income }}</div>
+      </div>
+      <div style="border-left:1px solid var(--border);padding-left:15px;">
+        <div style="font-size:11px;color:var(--muted);">Expenses</div>
+        <div style="font-size:18px;font-weight:700;color:var(--accent2);">₹{{ yearly_total }}</div>
+      </div>
+    </div>
   </div>
 
 </div>

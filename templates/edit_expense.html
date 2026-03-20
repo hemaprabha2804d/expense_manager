@@ -24,7 +24,7 @@
       <div class="form-group">
         <label>🏷️ Category</label>
         <select name="category">
-          {% for cat in ['Food','Travel','Shopping','Bills','Entertainment','Other'] %}
+          {% for cat in ['Food','Travel','Shopping','Bills','Entertainment','Medical','Repairs','Rent','Investments','Education','Groceries','Other'] %}
           <option {% if expense.category == cat %}selected{% endif %}>{{ cat }}</option>
           {% endfor %}
         </select>
