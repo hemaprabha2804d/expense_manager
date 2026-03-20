@@ -69,6 +69,15 @@ def get_dashboard_data():
     months_keys = sorted(list(cat_by_month.keys()), reverse=True)
     years_keys  = sorted(list(cat_by_year.keys()), reverse=True)
 
+    # 🔴 Create Descriptive Period Labels
+    from calendar import month_name
+    month_options = []
+    for k in months_keys:
+        try:
+            y, m = k.split("-")
+            month_options.append({"key": k, "label": f"{month_name[int(m)]} {y}"})
+        except: pass
+
     avg_expense = round(total_amount / len(expenses)) if expenses else 0
     highest_cat = max(category_totals, key=category_totals.get) if category_totals else "—"
 
@@ -82,9 +91,9 @@ def get_dashboard_data():
         "cat_labels":   json.dumps(list(category_totals.keys())),
         "cat_values":   json.dumps(list(category_totals.values())),
         "cat_by_month": json.dumps(cat_by_month),
-        "cat_by_year":  json.dumps(cat_by_year), # 🔴 Added
-        "months_keys":  months_keys,
-        "years_keys":   years_keys,               # 🔴 Added
+        "cat_by_year":  json.dumps(cat_by_year),
+        "month_options": month_options,           # 🔴 Added Pretty Month Objects
+        "years_keys":   years_keys,
         "total_amount": total_amount,
         "monthly_this": monthly_this,
         "avg_expense":  avg_expense,

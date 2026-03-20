@@ -61,7 +61,13 @@
       <div style="display:flex; gap:8px;">
         <select id="periodSelect" style="width:auto; padding:5px 10px; font-size:11px; border-radius:8px; background:var(--surface2);">
           <option value="all">All Time</option>
-          {% if months_keys %}<optgroup label="Months">{% for m in months_keys %}<option value="m_{{ m }}">{{ m }}</option>{% endfor %}</optgroup>{% endif %}
+          {% if month_options %}
+          <optgroup label="Months">
+            {% for m in month_options %}
+            <option value="m_{{ m.key }}">{{ m.label }}</option>
+            {% endfor %}
+          </optgroup>
+          {% endif %}
           {% if years_keys %}<optgroup label="Years">{% for y in years_keys %}<option value="y_{{ y }}">{{ y }}</option>{% endfor %}</optgroup>{% endif %}
         </select>
       </div>
