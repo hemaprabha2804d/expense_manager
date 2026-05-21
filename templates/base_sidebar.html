@@ -58,7 +58,21 @@
     .nav-logout .nav-item:hover { background: rgba(252,92,125,.12); color: var(--accent2); }
 
     /* ── MAIN ── */
-    .main { margin-left: var(--sidebar-w); flex: 1; padding: 32px; overflow-y: auto; background: var(--bg); transition: background 0.3s; }
+    .main { 
+      margin-left: var(--sidebar-w); 
+      flex: 1; 
+      padding: 32px; 
+      overflow-y: auto; 
+      background-color: var(--bg); 
+      background-image: linear-gradient(rgba(15, 17, 23, 0.75), rgba(15, 17, 23, 0.75)), url("{{ url_for('static', filename='images/finance_bg.png') }}");
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      transition: background 0.3s; 
+    }
+    body.light-theme .main {
+      background-image: linear-gradient(rgba(244, 246, 251, 0.88), rgba(244, 246, 251, 0.88)), url("{{ url_for('static', filename='images/finance_bg.png') }}");
+    }
     .page-header { margin-bottom: 28px; }
     .page-header h1 { font-size: 22px; font-weight: 700; }
     .page-header p { font-size: 13px; color: var(--muted); margin-top: 3px; }
@@ -111,6 +125,84 @@
     .empty-state .e-icon { font-size: 40px; margin-bottom: 10px; display: block; }
     .alert { display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg,rgba(108,99,255,.18),rgba(252,92,125,.12)); border: 1px solid rgba(108,99,255,.3); border-radius: 10px; padding: 12px 16px; font-size: 13px; margin-bottom: 24px; }
 
+    /* ── NOTIFICATION BELL ── */
+    .notif-bell-wrapper {
+      position: relative; display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; margin: 0 12px; border-radius: 10px;
+      background: var(--surface2); cursor: pointer;
+      transition: background .2s;
+    }
+    .notif-bell-wrapper:hover { background: var(--bg); }
+    .notif-bell-left { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--muted); }
+    .notif-badge {
+      background: linear-gradient(135deg, var(--accent2), #ff8a65);
+      color: white; font-size: 10px; font-weight: 700;
+      min-width: 18px; height: 18px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 5px; animation: pulseBadge 2s infinite;
+    }
+    .notif-badge.zero { background: rgba(255,255,255,.1); color: var(--muted); animation: none; }
+    @keyframes pulseBadge {
+      0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(252,92,125,.5); }
+      50%      { transform: scale(1.1); box-shadow: 0 0 0 5px rgba(252,92,125,0); }
+    }
+
+    /* ── TOAST NOTIFICATION SYSTEM ── */
+    #toast-container {
+      position: fixed; top: 20px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: all;
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px; border-radius: 14px;
+      min-width: 300px; max-width: 380px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,.35);
+      border: 1px solid;
+      animation: toastSlideIn .4s cubic-bezier(.34,1.56,.64,1) forwards;
+      position: relative; overflow: hidden;
+    }
+    .toast.hiding { animation: toastSlideOut .3s ease forwards; }
+    .toast-danger  { background: rgba(20,5,10,.82); border-color: rgba(252,92,125,.5); }
+    .toast-warning { background: rgba(20,14,0,.82);  border-color: rgba(247,151,30,.5); }
+    .toast-success { background: rgba(5,20,10,.82);  border-color: rgba(67,233,123,.5); }
+    .toast-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+    .toast-body { flex: 1; }
+    .toast-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .toast-danger  .toast-title { color: #fc5c7d; }
+    .toast-warning .toast-title { color: #f7971e; }
+    .toast-success .toast-title { color: #43e97b; }
+    .toast-msg { font-size: 12px; color: rgba(255,255,255,.65); line-height: 1.4; }
+    .toast-close {
+      position: absolute; top: 8px; right: 10px;
+      font-size: 14px; cursor: pointer; color: rgba(255,255,255,.3);
+      background: none; border: none; line-height: 1;
+      transition: color .2s;
+    }
+    .toast-close:hover { color: rgba(255,255,255,.8); }
+    .toast-progress {
+      position: absolute; bottom: 0; left: 0; height: 3px;
+      border-radius: 0 0 14px 14px;
+      animation: toastProgress linear forwards;
+    }
+    .toast-danger  .toast-progress { background: #fc5c7d; }
+    .toast-warning .toast-progress { background: #f7971e; }
+    .toast-success .toast-progress { background: #43e97b; }
+    @keyframes toastSlideIn {
+      from { opacity:0; transform: translateX(60px) scale(.9); }
+      to   { opacity:1; transform: translateX(0)   scale(1); }
+    }
+    @keyframes toastSlideOut {
+      from { opacity:1; transform: translateX(0) scale(1); max-height: 200px; margin-bottom: 10px; }
+      to   { opacity:0; transform: translateX(60px) scale(.9); max-height: 0;   margin-bottom: 0; }
+    }
+    @keyframes toastProgress {
+      from { width: 100%; }
+      to   { width: 0%; }
+    }
+
     {% block styles %}{% endblock %}
   </style>
 </head>
@@ -119,18 +211,40 @@
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-icon">💰</div>
-    <div class="logo-text">AI Expense<span>Tracker</span></div>
+    <div class="logo-text">Expense<span>Tracker</span></div>
   </div>
 
   <nav class="nav-section">
     <a href="/dashboard"      class="nav-item {% if current_path == '/dashboard' %}active{% endif %}"><span class="nav-icon">🏠</span> Dashboard</a>
     
-    <!-- 🔴 NEW: Add Income aligned right below Dashboard with unique green accent -->
+    <!-- Add Income aligned right below Dashboard with unique green accent -->
     <a href="/add-income-page" class="nav-item {% if current_path == '/add-income-page' %}active{% endif %}" style="color:var(--green);"><span class="nav-icon">💰</span> Add Income</a>
-    <a href="/add-expense-page" class="nav-item {% if current_path == '/add-expense-page' %}active{% endif %}"><span class="nav-icon">➕</span> Add Expense</a>
+    <a href="/view-income"     class="nav-item {% if current_path == '/view-income' %}active{% endif %}"     style="color:var(--green);"><span class="nav-icon">📄</span> View Income</a>
+    <a href="/add-expense-page" class="nav-item {% if current_path == '/add-expense-page' %}active{% endif %}" style="color:var(--accent2);"><span class="nav-icon">➕</span> Add Expense</a>
     
-    <a href="/view-expenses"  class="nav-item {% if current_path == '/view-expenses' %}active{% endif %}"><span class="nav-icon">📋</span> View Expenses</a>
+    <a href="/view-expenses"  class="nav-item {% if current_path == '/view-expenses' %}active{% endif %}" style="color:var(--accent2);"><span class="nav-icon">📋</span> View Expenses</a>
+    <a href="/charts" class="nav-item {% if current_path == '/charts' %}active{% endif %}"><span class="nav-icon">📊</span> Charts</a>
     <a href="/reports"        class="nav-item {% if current_path == '/reports' %}active{% endif %}"><span class="nav-icon">📊</span> Reports</a>
+
+    <div class="nav-divider"></div>
+    <!-- 🔔 Budget Alert Bell -->
+    <div class="notif-bell-wrapper" onclick="toggleAlertPanel()" title="Budget Alerts">
+      <div class="notif-bell-left">
+        <span style="font-size:18px;">🔔</span>
+        <span>Budget Alerts</span>
+      </div>
+      {% set ns = namespace(total=0) %}
+      {% if limit_warnings %}
+        {% for w in limit_warnings %}
+          {% if w.exceeded or w.pct >= 80 %}
+            {% set ns.total = ns.total + 1 %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+      <span class="notif-badge {% if ns.total == 0 %}zero{% endif %}" id="alertBadgeCount">
+        {{ ns.total if ns.total > 0 else '✓' }}
+      </span>
+    </div>
   </nav>
 
   <div class="nav-logout">
@@ -151,6 +265,86 @@
 <main class="main">
   {% block content %}{% endblock %}
 </main>
+
+<!-- 🔔 Toast Notification Container -->
+<div id="toast-container"></div>
+
+<!-- 📋 Alert Data passed from Jinja -->
+<script>
+  // Budget alert data injected from Flask
+  const BUDGET_ALERTS = [
+    {% if limit_warnings %}
+      {% for w in limit_warnings %}
+        {% if w.exceeded or w.pct >= 80 %}
+        {
+          type:     "{{ 'danger' if w.exceeded else 'warning' }}",
+          category: "{{ w.category }}",
+          spent:    {{ w.spent }},
+          limit:    {{ w.limit }},
+          pct:      {{ w.pct }},
+          exceeded: {{ 'true' if w.exceeded else 'false' }},
+          remaining:{{ w.remaining }}
+        },
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  ];
+
+  // ── Toast Engine ──────────────────────────────────────────────
+  function showToast({ type, category, spent, limit, pct, exceeded, remaining }, delay = 0) {
+    const container = document.getElementById('toast-container');
+    const duration  = 6000 + delay; // ms before auto-dismiss
+
+    const icon  = exceeded ? '🚨' : '⚠️';
+    const title = exceeded
+      ? `Budget Exceeded: ${category}`
+      : `Budget Warning: ${category}`;
+    const msg   = exceeded
+      ? `You've spent ₹${spent.toLocaleString()} — ₹${(spent-limit).toLocaleString()} over your ₹${limit.toLocaleString()} limit!`
+      : `₹${spent.toLocaleString()} of ₹${limit.toLocaleString()} spent (${pct}%). Only ₹${remaining.toLocaleString()} left.`;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <div class="toast-icon">${icon}</div>
+      <div class="toast-body">
+        <div class="toast-title">${title}</div>
+        <div class="toast-msg">${msg}</div>
+      </div>
+      <button class="toast-close" onclick="dismissToast(this.closest('.toast'))">✕</button>
+      <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
+    `;
+
+    setTimeout(() => {
+      container.appendChild(toast);
+      setTimeout(() => dismissToast(toast), duration);
+    }, delay);
+  }
+
+  function dismissToast(toast) {
+    if (!toast || toast.classList.contains('hiding')) return;
+    toast.classList.add('hiding');
+    setTimeout(() => toast.remove(), 350);
+  }
+
+  // ── Alert Side Panel Toggle ───────────────────────────────────
+  function toggleAlertPanel() {
+    // Scroll dashboard to the budget limits card
+    const el = document.getElementById('budget-limits-card');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.style.outline = '2px solid var(--accent)';
+      setTimeout(() => el.style.outline = '', 1800);
+    }
+  }
+
+  // ── Fire toasts on page load with stagger ────────────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    BUDGET_ALERTS.forEach((alert, i) => {
+      showToast(alert, i * 700);
+    });
+  });
+</script>
 
 <!-- 🔴 Theme Toggler JavaScript Script Loader -->
 <script>

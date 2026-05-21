@@ -1,6 +1,6 @@
 {% extends 'base_auth.html' %}
-{% block title %}AI Expense Tracker{% endblock %}
-{% block subtitle %}Manage your finances smartly with AI{% endblock %}
+{% block title %}Expense Tracker{% endblock %}
+{% block subtitle %}Manage your finances smartly{% endblock %}
 
 {% block content %}
 <div style="text-align:center;margin-bottom:28px;">
@@ -8,14 +8,13 @@
   <p style="color:var(--muted);font-size:14px;">Track, analyse, and control your spending</p>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
+<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:24px;">
   {% for icon, label, desc in [
     ('📊','Smart Analytics','Charts & insights'),
-    ('🤖','AI Suggestions','Smart spending tips'),
     ('📅','Monthly Reports','Track by period'),
     ('🏷️','Categories','Organized tracking')
   ] %}
-  <div style="background:var(--surface2);border-radius:12px;padding:16px;text-align:center;">
+  <div style="width:calc(50% - 6px);background:var(--surface2);border-radius:12px;padding:16px;text-align:center;">
     <div style="font-size:24px;margin-bottom:6px;">{{ icon }}</div>
     <div style="font-size:13px;font-weight:600;">{{ label }}</div>
     <div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ desc }}</div>
@@ -25,4 +24,29 @@
 
 <a href="/register" class="btn-block btn-success" style="margin-bottom:10px;">🚀 Get Started Free</a>
 <a href="/login"    class="btn-block btn-primary">🔐 Sign In</a>
+
+<!-- Tips Section -->
+<div style="margin-top:24px;">
+  <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px;">💡 Why Track Expenses?</p>
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:10px 14px;">
+      <span style="font-size:18px;">✅</span>
+      <span style="font-size:13px;color:var(--text);">Know where every rupee goes</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:10px 14px;">
+      <span style="font-size:18px;">📉</span>
+      <span style="font-size:13px;color:var(--text);">Spot and cut unnecessary spending</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:10px 14px;">
+      <span style="font-size:18px;">🎯</span>
+      <span style="font-size:13px;color:var(--text);">Stay on top of your savings goals</span>
+    </div>
+  </div>
+</div>
+
+<!-- Quote -->
+<div style="margin-top:20px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--surface2);border-radius:0 10px 10px 0;">
+  <p style="font-size:12px;font-style:italic;color:var(--muted);line-height:1.6;">"A budget is telling your money where to go instead of wondering where it went."</p>
+  <p style="font-size:11px;color:var(--accent);margin-top:6px;font-weight:600;">— Dave Ramsey</p>
+</div>
 {% endblock %}

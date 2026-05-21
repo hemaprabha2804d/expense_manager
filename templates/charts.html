@@ -1,0 +1,346 @@
+{% extends 'base_sidebar.html' %}
+{% block title %}Charts – AI Expense Tracker{% endblock %}
+
+{% block styles %}
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+  margin-bottom: 24px;
+}
+.chart-card-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; padding: 4px 10px;
+  border-radius: 20px; margin-bottom: 4px;
+}
+.chart-card-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.chart-canvas-wrap { position: relative; height: 280px; margin-top: 16px; }
+.chart-stat-row {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.chart-stat { flex: 1; min-width: 80px; }
+.chart-stat-val { font-size: 16px; font-weight: 700; }
+.chart-stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* Full-width comparison card */
+.chart-full { margin-bottom: 22px; }
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+  <div>
+    <h1>📊 Expense Charts</h1>
+    <p>All chart views for your spending data</p>
+  </div>
+  <!-- Period Filter -->
+  <select id="globalPeriod" style="width:auto;padding:8px 14px;font-size:13px;border-radius:10px;background:var(--surface);">
+    <option value="all">📅 All Time</option>
+    {% if month_options %}
+    <optgroup label="By Month">
+      {% for m in month_options %}
+      <option value="m_{{ m.key }}">{{ m.label }}</option>
+      {% endfor %}
+    </optgroup>
+    {% endif %}
+    {% if years_keys %}
+    <optgroup label="By Year">
+      {% for y in years_keys %}
+      <option value="y_{{ y }}">{{ y }}</option>
+      {% endfor %}
+    </optgroup>
+    {% endif %}
+  </select>
+</div>
+
+{% if total_count == 0 %}
+<div class="card">
+  <div class="empty-state" style="padding:60px;">
+    <span class="e-icon">📊</span>
+    No expense data yet. <a href="/add-expense-page" style="color:var(--accent);">Add your first expense →</a>
+  </div>
+</div>
+{% else %}
+
+<!-- ── Row 1: Bar + Pie ── -->
+<div class="charts-grid">
+
+  <!-- Bar Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">📊 Bar Chart</div>
+        <div class="chart-card-subtitle">Category spending comparison</div>
+      </div>
+      <span class="chart-card-label" style="background:rgba(108,99,255,.15);color:var(--accent);">Bar</span>
+    </div>
+    <div class="chart-canvas-wrap"><canvas id="chartBar"></canvas></div>
+    <div class="chart-stat-row" id="statBar"></div>
+  </div>
+
+  <!-- Pie Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🥧 Pie Chart</div>
+        <div class="chart-card-subtitle">Proportional spending breakdown</div>
+      </div>
+      <span class="chart-card-label" style="background:rgba(252,92,125,.15);color:#fc5c7d;">Pie</span>
+    </div>
+    <div class="chart-canvas-wrap"><canvas id="chartPie"></canvas></div>
+    <div class="chart-stat-row" id="statPie"></div>
+  </div>
+
+</div>
+
+<!-- ── Row 2: Doughnut + Line ── -->
+<div class="charts-grid">
+
+  <!-- Doughnut Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🍩 Doughnut Chart</div>
+        <div class="chart-card-subtitle">Clean ring breakdown with legend</div>
+      </div>
+      <span class="chart-card-label" style="background:rgba(247,151,30,.15);color:#f7971e;">Doughnut</span>
+    </div>
+    <div class="chart-canvas-wrap"><canvas id="chartDoughnut"></canvas></div>
+    <div class="chart-stat-row" id="statDoughnut"></div>
+  </div>
+
+  <!-- Line Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">📈 Line Chart</div>
+        <div class="chart-card-subtitle">Spending trend over time</div>
+      </div>
+      <span class="chart-card-label" style="background:rgba(0,210,255,.15);color:#00d2ff;">Line</span>
+    </div>
+    <div class="chart-canvas-wrap"><canvas id="chartLine"></canvas></div>
+    <div class="chart-stat-row" id="statLine"></div>
+  </div>
+
+</div>
+
+<!-- ── Row 3: Polar Area + Radar ── -->
+<div class="charts-grid">
+
+  <!-- Polar Area -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🎯 Polar Area Chart</div>
+        <div class="chart-card-subtitle">Mixed size area comparison</div>
+      </div>
+      <span class="chart-card-label" style="background:rgba(67,233,123,.15);color:#43e97b;">Polar</span>
+    </div>
+    <div class="chart-canvas-wrap"><canvas id="chartPolar"></canvas></div>
+    <div class="chart-stat-row" id="statPolar"></div>
+  </div>
+
+  <!-- Radar Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">🕸️ Radar Chart</div>
+        <div class="chart-card-subtitle">Multi-axis spending overview</div>
+      </div>
+      <span class="chart-card-label" style="background:rgba(162,155,254,.15);color:#a29bfe;">Radar</span>
+    </div>
+    <div class="chart-canvas-wrap"><canvas id="chartRadar"></canvas></div>
+    <div class="chart-stat-row" id="statRadar"></div>
+  </div>
+
+</div>
+
+<!-- ── Full Width: Income vs Expense ── -->
+<div class="card chart-full">
+  <div class="card-header">
+    <div>
+      <div class="card-title">📊 Income vs Expense — Monthly</div>
+      <div class="chart-card-subtitle">Last 6 months side-by-side comparison</div>
+    </div>
+    <div style="display:flex;gap:16px;font-size:12px;align-items:center;">
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span style="width:12px;height:12px;border-radius:3px;background:#43e97b;display:inline-block;"></span>
+        <span style="color:var(--muted);">Income</span>
+      </span>
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span style="width:12px;height:12px;border-radius:3px;background:#fc5c7d;display:inline-block;"></span>
+        <span style="color:var(--muted);">Expense</span>
+      </span>
+    </div>
+  </div>
+  <div style="position:relative;height:280px;margin-top:12px;">
+    <canvas id="chartComparison"></canvas>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+const COLORS    = ['#6c63ff','#fc5c7d','#43e97b','#f7971e','#00d2ff','#a29bfe','#5546e8','#e63956','#2ecc71','#f39c12','#1abc9c','#34495e'];
+const COLORS_BG = COLORS.map(c => c + 'bb');
+
+const allLabels   = {{ cat_labels|safe }};
+const allValues   = {{ cat_values|safe }};
+const monthlyData = {{ cat_by_month|safe }};
+const yearlyData  = {{ cat_by_year|safe }};
+const cmpLabels   = {{ comparison_labels|safe }};
+const cmpIncome   = {{ comparison_income|safe }};
+const cmpExpenses = {{ comparison_expenses|safe }};
+
+// Track all chart instances so we can destroy/rebuild on period change
+let charts = {};
+
+// ── Common options helpers ────────────────────────────────────────
+function axisOpts() {
+  return {
+    y: { beginAtZero:true, grid:{ color:'rgba(255,255,255,0.05)' }, ticks:{ color:'#8892a4', font:{ size:10 }, callback: v => '₹'+v.toLocaleString() } },
+    x: { grid:{ display:false }, ticks:{ color:'#8892a4', font:{ size:10 } } }
+  };
+}
+function radialLegend() {
+  return { display:true, position:'right', labels:{ color:'#8892a4', font:{ size:11 }, padding:12, boxWidth:12 } };
+}
+function tooltipCb() {
+  return { callbacks:{ label: ctx => {
+    const v = ctx.parsed?.y ?? ctx.parsed ?? ctx.raw ?? 0;
+    return ' ₹' + Number(v).toLocaleString();
+  }}};
+}
+
+// ── Stat pills ────────────────────────────────────────────────────
+function renderStats(elId, labels, values) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const total = values.reduce((a,b) => a+b, 0);
+  const top   = labels.reduce((ti, _, i) => values[i] > values[ti] ? i : ti, 0);
+  el.innerHTML = `
+    <div class="chart-stat">
+      <div class="chart-stat-val" style="color:var(--accent);">₹${total.toLocaleString()}</div>
+      <div class="chart-stat-lbl">Total Spent</div>
+    </div>
+    <div class="chart-stat">
+      <div class="chart-stat-val" style="color:var(--accent2);">${labels[top] || '—'}</div>
+      <div class="chart-stat-lbl">Top Category</div>
+    </div>
+    <div class="chart-stat">
+      <div class="chart-stat-val" style="color:var(--yellow);">${labels.length}</div>
+      <div class="chart-stat-lbl">Categories</div>
+    </div>
+  `;
+}
+
+// ── Build all 6 charts ────────────────────────────────────────────
+function buildAllCharts(labels, values) {
+  // Destroy existing
+  Object.values(charts).forEach(c => { if(c) c.destroy(); });
+  charts = {};
+
+  if (!labels.length) return;
+
+  const animOpts = { duration:600, easing:'easeInOutQuart' };
+
+  // 1. Bar
+  charts.bar = new Chart(document.getElementById('chartBar'), {
+    type: 'bar',
+    data: { labels, datasets:[{ label:'Spent (₹)', data:values, backgroundColor:COLORS_BG, borderColor:COLORS, borderWidth:1, borderRadius:6 }] },
+    options: { responsive:true, maintainAspectRatio:false, animation:animOpts,
+      plugins:{ legend:{ display:false }, tooltip:tooltipCb() },
+      scales: axisOpts() }
+  });
+  renderStats('statBar', labels, values);
+
+  // 2. Pie
+  charts.pie = new Chart(document.getElementById('chartPie'), {
+    type: 'pie',
+    data: { labels, datasets:[{ data:values, backgroundColor:COLORS_BG, borderColor:COLORS, borderWidth:2, hoverOffset:12 }] },
+    options: { responsive:true, maintainAspectRatio:false, animation:animOpts,
+      plugins:{ legend:radialLegend(), tooltip:tooltipCb() } }
+  });
+  renderStats('statPie', labels, values);
+
+  // 3. Doughnut
+  charts.doughnut = new Chart(document.getElementById('chartDoughnut'), {
+    type: 'doughnut',
+    data: { labels, datasets:[{ data:values, backgroundColor:COLORS_BG, borderColor:COLORS, borderWidth:2, hoverOffset:12 }] },
+    options: { responsive:true, maintainAspectRatio:false, animation:animOpts,
+      plugins:{ legend:radialLegend(), tooltip:tooltipCb() },
+      cutout: '60%' }
+  });
+  renderStats('statDoughnut', labels, values);
+
+  // 4. Line
+  charts.line = new Chart(document.getElementById('chartLine'), {
+    type: 'line',
+    data: { labels, datasets:[{ label:'Spent (₹)', data:values, borderColor:'#6c63ff', backgroundColor:'rgba(108,99,255,.15)', borderWidth:2, tension:0.4, fill:true, pointBackgroundColor:COLORS, pointRadius:6, pointHoverRadius:8 }] },
+    options: { responsive:true, maintainAspectRatio:false, animation:animOpts,
+      plugins:{ legend:{ display:false }, tooltip:tooltipCb() },
+      scales: axisOpts() }
+  });
+  renderStats('statLine', labels, values);
+
+  // 5. Polar Area
+  charts.polar = new Chart(document.getElementById('chartPolar'), {
+    type: 'polarArea',
+    data: { labels, datasets:[{ data:values, backgroundColor:COLORS_BG, borderColor:COLORS, borderWidth:1 }] },
+    options: { responsive:true, maintainAspectRatio:false, animation:animOpts,
+      plugins:{ legend:radialLegend(), tooltip:tooltipCb() } }
+  });
+  renderStats('statPolar', labels, values);
+
+  // 6. Radar
+  charts.radar = new Chart(document.getElementById('chartRadar'), {
+    type: 'radar',
+    data: { labels, datasets:[{ label:'Spent (₹)', data:values, borderColor:'#6c63ff', backgroundColor:'rgba(108,99,255,.2)', borderWidth:2, pointBackgroundColor:'#6c63ff', pointRadius:4 }] },
+    options: { responsive:true, maintainAspectRatio:false, animation:animOpts,
+      plugins:{ legend:{ display:false }, tooltip:tooltipCb() },
+      scales:{ r:{ beginAtZero:true, grid:{ color:'rgba(255,255,255,0.08)' }, ticks:{ color:'#8892a4', font:{ size:9 }, backdropColor:'transparent' }, pointLabels:{ color:'#8892a4', font:{ size:10 } } } } }
+  });
+  renderStats('statRadar', labels, values);
+}
+
+// ── Income vs Expense comparison chart ───────────────────────────
+if (cmpLabels.length > 0) {
+  charts.comparison = new Chart(document.getElementById('chartComparison'), {
+    type: 'bar',
+    data: {
+      labels: cmpLabels,
+      datasets: [
+        { label:'Income ₹',  data:cmpIncome,   backgroundColor:'rgba(67,233,123,.75)', borderColor:'#43e97b', borderWidth:1, borderRadius:6 },
+        { label:'Expense ₹', data:cmpExpenses, backgroundColor:'rgba(252,92,125,.75)', borderColor:'#fc5c7d', borderWidth:1, borderRadius:6 }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, animation:{ duration:600 },
+      plugins:{ legend:{ display:true, labels:{ color:'#8892a4', font:{ size:12 }, boxWidth:14 } }, tooltip:tooltipCb() },
+      scales: axisOpts() }
+  });
+}
+
+// ── Global period filter ──────────────────────────────────────────
+document.getElementById('globalPeriod')?.addEventListener('change', function () {
+  const val = this.value;
+  let labels, values;
+  if (val === 'all') {
+    labels = allLabels; values = allValues;
+  } else {
+    const isMonth = val.startsWith('m_');
+    const key = val.substring(2);
+    const data = isMonth ? (monthlyData[key]||{}) : (yearlyData[key]||{});
+    labels = Object.keys(data);
+    values = Object.values(data);
+  }
+  buildAllCharts(labels, values);
+});
+
+// ── Initial render ───────────────────────────────────────────────
+buildAllCharts(allLabels, allValues);
+</script>
+{% endblock %}

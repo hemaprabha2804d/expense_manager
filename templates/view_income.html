@@ -1,0 +1,159 @@
+{% extends 'base_sidebar.html' %}
+{% block title %}View Income – AI Expense Tracker{% endblock %}
+
+{% block styles %}
+.action-btns { display:flex; gap:8px; }
+.src-pill { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+.src-Salary     { background:rgba(67,233,123,.15);  color:#43e97b; }
+.src-Freelance  { background:rgba(108,99,255,.15);  color:#6c63ff; }
+.src-Business   { background:rgba(247,151,30,.15);  color:#f7971e; }
+.src-Investment { background:rgba(0,210,255,.15);   color:#00d2ff; }
+.src-Rent       { background:rgba(252,92,125,.15);  color:#fc5c7d; }
+.src-Gift       { background:rgba(162,155,254,.15); color:#a29bfe; }
+.src-Other      { background:rgba(255,255,255,.08); color:var(--muted); }
+
+/* ── Delete Modal ── */
+#delete-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+}
+#delete-modal-overlay.show { display: flex; }
+#delete-modal {
+  background: var(--surface); border: 1px solid rgba(67,233,123,.25);
+  border-radius: 20px; padding: 36px 32px 28px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.5);
+  text-align: center;
+  transform: scale(.88) translateY(16px); opacity: 0;
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+}
+#delete-modal-overlay.show #delete-modal { transform: scale(1) translateY(0); opacity: 1; }
+.delete-modal-icon {
+  width: 68px; height: 68px;
+  background: linear-gradient(135deg, rgba(67,233,123,.18), rgba(0,210,255,.1));
+  border: 1px solid rgba(67,233,123,.3); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 30px;
+  margin: 0 auto 20px;
+  animation: iconPop .4s .15s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes iconPop { from { transform:scale(0) rotate(-20deg); } to { transform:scale(1) rotate(0); } }
+.delete-modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.delete-modal-msg   { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
+.delete-modal-actions { display: flex; gap: 12px; justify-content: center; }
+.delete-modal-actions .btn { flex: 1; justify-content: center; padding: 12px 20px; font-size: 14px; border-radius: 12px; }
+.btn-cancel-modal { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); transition: all .2s; }
+.btn-cancel-modal:hover { color: var(--text); background: var(--bg); }
+.btn-confirm-delete {
+  background: linear-gradient(135deg, #fc5c7d, #ff8a65);
+  color: white; border: none;
+  box-shadow: 0 4px 16px rgba(252,92,125,.35); transition: all .2s;
+}
+.btn-confirm-delete:hover { opacity:.9; transform:translateY(-1px); }
+{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
+  <div>
+    <h1>💰 All Income</h1>
+    <p>{{ income|length }} record{{ 's' if income|length != 1 else '' }} found</p>
+  </div>
+  <a href="/add-income-page" class="btn btn-primary" style="background:linear-gradient(135deg,var(--green),#1abc9c);">➕ Add Income</a>
+</div>
+
+<div class="card">
+  {% if income %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Source</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>Note</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inc in income %}
+      <tr>
+        <td style="color:var(--muted);font-size:12px;">{{ loop.index }}</td>
+        <td><span class="src-pill src-{{ inc.source }}">{{ inc.source }}</span></td>
+        <td style="font-weight:600;color:var(--green);">₹{{ inc.amount }}</td>
+        <td style="color:var(--muted);">{{ inc.date or '—' }}</td>
+        <td style="color:var(--muted);font-size:13px;">{{ inc.note or '—' }}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-danger btn-sm"
+              onclick="openDeleteModal('{{ inc._id }}', '{{ inc.source }}', '{{ inc.amount }}', '{{ inc.date or '' }}')">
+              🗑️ Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <span class="e-icon">💰</span>
+    No income recorded yet.<br>
+    <a href="/add-income-page" style="color:var(--green);margin-top:8px;display:inline-block;">+ Add your first income</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ── Custom Delete Confirmation Modal ── -->
+<div id="delete-modal-overlay" onclick="handleOverlayClick(event)">
+  <div id="delete-modal" role="dialog" aria-modal="true">
+    <div class="delete-modal-icon">🗑️</div>
+    <div class="delete-modal-title">Delete Income?</div>
+    <div class="delete-modal-msg" id="delete-modal-msg">
+      This action <strong>cannot be undone.</strong>
+    </div>
+    <div class="delete-modal-actions">
+      <button class="btn btn-cancel-modal" onclick="closeDeleteModal()">✕ Cancel</button>
+      <a id="delete-confirm-link" href="#" class="btn btn-confirm-delete">🗑️ Yes, Delete</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openDeleteModal(id, source, amount, date) {
+    document.getElementById('delete-modal-msg').innerHTML = `
+      Are you sure you want to delete this income record?<br><br>
+      <div style="background:var(--surface2);border-radius:10px;padding:12px 16px;text-align:left;font-size:13px;display:flex;flex-direction:column;gap:6px;">
+        <span>🏷️ Source: <strong style="color:var(--text);">${source}</strong></span>
+        <span>💰 Amount: <strong style="color:var(--green);">₹${amount}</strong></span>
+        ${date ? `<span>📅 Date: <strong style="color:var(--text);">${date}</strong></span>` : ''}
+      </div>
+      <br>This action <strong>cannot be undone.</strong>
+    `;
+    document.getElementById('delete-confirm-link').href = `/delete-income/${id}`;
+    const overlay = document.getElementById('delete-modal-overlay');
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDeleteModal() {
+    const overlay = document.getElementById('delete-modal-overlay');
+    const modal   = document.getElementById('delete-modal');
+    modal.style.transform = 'scale(.88) translateY(16px)';
+    modal.style.opacity   = '0';
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      modal.style.transform = '';
+      modal.style.opacity   = '';
+      document.body.style.overflow = '';
+    }, 260);
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('delete-modal-overlay')) closeDeleteModal();
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDeleteModal(); });
+</script>
+{% endblock %}
